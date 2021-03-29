@@ -84,7 +84,6 @@ def compute_imputation_MAE_pct(df_to_impute, name_data_to_impute, df_imputed, na
 
         total_pct_diff = total_pct_diff + sum_abs_diff
         dict_result[var] = pct_diff
-    print(total_pct_diff/n)
     df_result = pd.DataFrame({"data_to_impute": [name_data_to_impute],
                               "impute_method": [name_impute_method],
                               "percentage_MAE": [total_pct_diff/n]})
@@ -94,5 +93,33 @@ def compute_imputation_MAE_pct(df_to_impute, name_data_to_impute, df_imputed, na
 # test
 temp = compute_imputation_MAE_pct(temp, "testing", df_nona, "cheating")
 
+def generate_DFs_forImputation(lst_vars, name_batch, lst_miss_pct_single=[0.1, 0.15, 0.3], lst_miss_pct_batch=[0.01, 0.05, 0.1, 0.15, 0.3], df=df_nona):
 
+    """
+    This function generates dataframes that are needed for imputation.
+    Return nothing, but generates csv file.
+
+    :param lst_vars: a list of variables to impute
+    :param name_batch: a str, name of the csv file that has missing values for all specified variables
+    :param lst_miss_pct_single:  a list of missing percentage for dataframes with missing entries for only one variable
+    :param lst_miss_pct_batch: a list of missing percentage for the dataframe with missing entires for all specified variables
+    :param df: a dataframe with complete rows
+    :return: None
+    """
+
+    for var in lst_vars:
+        for pct_miss in lst_miss_pct_single:
+            df = createMCAR_df(df, [var], pct_miss)
+            df.to_csv(path_data_processed+"data_"+var+"_"+str(int(pct_miss*100))+".csv", index=False)
+            print("data_"+var+"_"+str(int(pct_miss*100))+".csv"+" created!")
+    for pct_miss in lst_miss_pct_batch:
+        df = createMCAR_df(df, lst_miss_pct_batch, pct_miss)
+        df.to_csv(path_data_processed+"data_"+name_batch+"_"+str(int(pct_miss*100))+".csv", index=False)
+        print("data_" + name_batch + "_" + str(int(pct_miss * 100)) + ".csv" + " created!")
+    return None
+
+# generate data for imputation
+if __name__ == "main":
+    lst_vars = ['age', 'cigsPerDay', 'totChol', 'sysBP', 'diaBP', 'BMI', 'heartRate', 'glucose']
+    generate_DFs_forImputation(lst_vars, "allNumerics")
 
