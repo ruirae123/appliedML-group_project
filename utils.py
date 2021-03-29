@@ -119,6 +119,12 @@ def generate_DFs_forImputation(lst_vars, name_batch, lst_miss_pct_single=[0.1, 0
     return None
 
 # generate data for imputation
+<<<<<<< HEAD
 lst_vars = ['age', 'cigsPerDay', 'totChol', 'sysBP', 'diaBP', 'BMI', 'heartRate', 'glucose']
 generate_DFs_forImputation(lst_vars, "allNumerics")
+=======
+if __name__ == "main":
+    lst_vars = ['age', 'cigsPerDay', 'totChol', 'sysBP', 'diaBP', 'BMI', 'heartRate', 'glucose']
+    generate_DFs_forImputation(lst_vars, "allNumerics")
+>>>>>>> dev-Rui
 
