@@ -5,8 +5,8 @@ import numpy as np
 import re
 
 # set up the paths
-path_data_raw = "C:/Users/Rui/Desktop/MIT/Academic/0-AppliedML/project/data_raw/"
-path_data_processed = "C:/Users/Rui/Desktop/MIT/Academic/0-AppliedML/project/data_processed/"
+path_data_raw = "C:/Users/Rui/Desktop/MIT/Academic/0-AppliedML/appliedML-group_project/data_raw/"
+path_data_processed = "C:/Users/Rui/Desktop/MIT/Academic/0-AppliedML/appliedML-group_project/data_processed/"
 
 # set up the file name
 f_data_raw = "framingham.csv"
