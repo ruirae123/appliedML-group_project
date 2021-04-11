@@ -1,5 +1,6 @@
 from settings import *
 import random
+from sklearn.preprocessing import MinMaxScaler
 
 def createMCAR_single(lst, pct_miss, seed=seed_num):
     """
@@ -10,12 +11,12 @@ def createMCAR_single(lst, pct_miss, seed=seed_num):
     :return: a list of values with np.nan
     """
     random.seed(seed)
-    idx_na = random.sample(range(len(lst)), int(round(pct_miss*len(lst))))
-    lst = [np.nan if i in idx_na else lst[i] for i in range(len(lst))]
-    return np.array([lst])
+    idx_na = random.sample(range(len(lst)), round(pct_miss*len(lst)))
+    lst_masked = [np.nan if i in idx_na else lst[i] for i in range(len(lst))]
+    return np.array([lst_masked])
 
 # test case
-temp = createMCAR_single(df_nona['age'].values.tolist(), 0.01)
+temp = createMCAR_single(df_nona['age'].values.tolist(), 0.2)
 
 def createMCAR_df(df, lst_var_names, pct_miss, seed=seed_num):
     """
@@ -47,14 +48,14 @@ def createMCAR_df(df, lst_var_names, pct_miss, seed=seed_num):
     return df_temp
 
 # test case
-temp = createMCAR_df(df_nona, ["age", "sysBP", "diaBP"], 0.01)
+temp = createMCAR_df(df_nona, ["age", "sysBP", "diaBP"], 0.1)
 
-def compute_imputation_MAE_pct(df_to_impute, name_data_to_impute, df_imputed, name_impute_method, df_original=df_nona):
 
+def compute_imputation_MAE(df_to_impute, name_data_to_impute, df_imputed, name_impute_method, df_original=df_nona):
     """
     This function calculate the metric to evaluate imputation performance.
-    For every missing entries, calculate the percentage difference between the original and imputed values.
-    The error score for the entire imputed dataset is the sum of absolute percentage difference, divided by the total missing entries
+    For every missing entries, calculate the difference between the original and imputed normalized values.
+    The error score for the entire imputed dataset is the sum of absolute difference, divided by the total missing entries
     Return a data frame with 4 cols: the version of data used for imputation, imputation method, error score, and a dict that contains the detailed pct_diff for each var.
 
     :param df_to_impute: data frame that was used for imputation
@@ -64,34 +65,35 @@ def compute_imputation_MAE_pct(df_to_impute, name_data_to_impute, df_imputed, na
     :param df_original: the original complete data frame
     :return: a dataframe that summarize the result
     """
+    # scale it so that scaling won't be an issue
+    s = MinMaxScaler()
+    df_original = s.fit_transform(X=df_original.to_numpy())
+    df_original = pd.DataFrame(data=df_original, columns=df_to_impute.columns.tolist())
+    df_imputed = s.fit_transform(X=df_imputed.to_numpy())
+    df_imputed = pd.DataFrame(data=df_imputed, columns=df_to_impute.columns.tolist())
 
-    temp = df_to_impute.isnull().sum()
-    cols_imputed = temp[temp>0].reset_index()['index'].to_list()
+    # setup
+    temp = df_to_impute.isna().sum()
+    cols_imputed = temp[temp > 0].reset_index()['index'].to_list()
     dict_result = {}
-    total_pct_diff = 0
+    total_diff = 0
     n = df_to_impute.isna().sum().sum()
-    idx_range = range(df_original.shape[0])
 
+    # calculate the difference between original and imputed
     for var in cols_imputed:
-
-        idx_na = df_to_impute[df_to_impute[var].isna()].index.tolist()
         diff = df_original[var] - df_imputed[var]
-        diff = [diff[i] for i in idx_range if i in idx_na]
-        origin = [df_original[var][i] for i in idx_range if i in idx_na]
+        sum_abs_diff = abs(diff).sum()
+        total_diff = total_diff + sum_abs_diff
+        dict_result[var] = diff
 
-        pct_diff = pd.Series(diff)/pd.Series(origin)
-        sum_abs_diff = abs(pct_diff).sum()
-
-        total_pct_diff = total_pct_diff + sum_abs_diff
-        dict_result[var] = pct_diff
     df_result = pd.DataFrame({"data_to_impute": [name_data_to_impute],
                               "impute_method": [name_impute_method],
-                              "percentage_MAE": [total_pct_diff/n]})
+                              "MAE_normalized": [total_diff / n]})
 
     return df_result
 
 # test
-temp = compute_imputation_MAE_pct(temp, "testing", df_nona, "cheating")
+temp = compute_imputation_MAE(temp, "testing", df_nona, "cheating")
 
 def generate_DFs_forImputation(lst_vars, name_batch, lst_miss_pct_single=[0.1, 0.15, 0.3], lst_miss_pct_batch=[0.01, 0.05, 0.1, 0.15, 0.3], df=df_nona):
 
@@ -109,14 +111,22 @@ def generate_DFs_forImputation(lst_vars, name_batch, lst_miss_pct_single=[0.1, 0
 
     for var in lst_vars:
         for pct_miss in lst_miss_pct_single:
-            df = createMCAR_df(df, [var], pct_miss)
+            df = createMCAR_df(df_nona, [var], pct_miss)
+            if 'index' in df.columns.tolist():
+                df.drop(columns=['index'], inplace=True)
             df.to_csv(path_data_processed+"data_"+var+"_"+str(int(pct_miss*100))+".csv", index=False)
             print("data_"+var+"_"+str(int(pct_miss*100))+".csv"+" created!")
+
     for pct_miss in lst_miss_pct_batch:
-        df = createMCAR_df(df, lst_miss_pct_batch, pct_miss)
+        df = createMCAR_df(df_nona, lst_vars, pct_miss)
+        if 'index' in df.columns.tolist():
+            df.drop(columns=['index'], inplace=True)
         df.to_csv(path_data_processed+"data_"+name_batch+"_"+str(int(pct_miss*100))+".csv", index=False)
         print("data_" + name_batch + "_" + str(int(pct_miss * 100)) + ".csv" + " created!")
     return None
+
+lst_vars = ['age', 'cigsPerDay', 'totChol', 'sysBP', 'diaBP', 'BMI', 'heartRate', 'glucose']
+generate_DFs_forImputation(lst_vars, "allNumerics")
 
 # generate data for imputation
 if __name__ == "main":
