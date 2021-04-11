@@ -42,7 +42,6 @@ print("\n")
 print("f1 of Logistic Regression:",lr_f1_score,'\n')
 print(classification_report(y_test,lr_predict))
 
-
 # modeling - gradient boosting
 m2 = 'Gradient Boosting Classifier'
 gbc =  GradientBoostingClassifier()

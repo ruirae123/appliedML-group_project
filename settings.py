@@ -14,7 +14,7 @@ f_data_raw = "framingham.csv"
 # read in file
 df_raw = pd.read_csv(path_data_raw+f_data_raw) # original
 df_nona = df_raw[~df_raw.isnull().any(axis=1)].reset_index() # without rows that have missing values
-df_nona.drop(['index'], axis=1, inplace=True)
+df_nona.drop(['index', 'TenYearCHD'], axis=1, inplace=True)
 
 # miscellaneous
 seed_num = 123

@@ -95,7 +95,7 @@ def compute_imputation_MAE(df_to_impute, name_data_to_impute, df_imputed, name_i
 # test
 temp = compute_imputation_MAE(temp, "testing", df_nona, "cheating")
 
-def generate_DFs_forImputation(lst_vars, name_batch, lst_miss_pct_single=[0.1, 0.15, 0.3], lst_miss_pct_batch=[0.01, 0.05, 0.1, 0.15, 0.3], df=df_nona):
+def generate_DFs_forImputation(lst_vars, name_batch, lst_miss_pct_single=[0.1, 0.15, 0.3], lst_miss_pct_batch=[0.1, 0.2, 0.3, 0.4, 0.5], df=df_nona):
 
     """
     This function generates dataframes that are needed for imputation.
