@@ -87,6 +87,5 @@ for f_name in os.listdir(path_data_imputed):
         with open(os.path.join(path_data_imputed, f_name), 'rb') as f:
             df_imputed = pickle.load(f)
         df_imputed['TenYearCHD'] = label.tolist()
-
-        with open(os.path.join(path_data_prediction, 'prediction_data_'+'_'.join(f_name.split('_')[2:4]) + '.pkl'), 'wb') as f:
+        with open(os.path.join(path_data_prediction, 'prediction_data_'+'_'.join(f_name.split('_')[2:4])), 'wb') as f:
             pickle.dump(df_imputed, f)
