@@ -40,7 +40,7 @@ def manual_model(X, y, data_version):
 df_result = pd.DataFrame()
 
 for f_name in os.listdir(path_data_prediction):
-
+    print(f_name)
     with open(os.path.join(path_data_prediction, f_name), 'rb') as f:
         df = pickle.load(f)
 
