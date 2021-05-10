@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 # modeling
 from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.metrics import confusion_matrix, f1_score, roc_curve, classification_report
+from sklearn.metrics import confusion_matrix, f1_score, classification_report
 # hyperparameter tuning
 from sklearn.model_selection import RandomizedSearchCV
 
@@ -21,7 +21,7 @@ oversample = SMOTE(sampling_strategy=0.5, random_state=seed_num)
 X, y = oversample.fit_resample(X, y)
 
 ## test train split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=seed_num)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=seed_num)
 
 ## scale the data
 scaler = MinMaxScaler()
@@ -36,7 +36,7 @@ model = lr.fit(X_train, y_train)
 lr_predict = lr.predict(X_test)
 lr_conf_matrix = confusion_matrix(y_test, lr_predict)
 lr_f1_score = f1_score(y_test, lr_predict)
-print("confussion matrix")
+print("confusion matrix")
 print(lr_conf_matrix)
 print("\n")
 print("f1 of Logistic Regression:",lr_f1_score,'\n')
